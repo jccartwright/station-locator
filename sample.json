@@ -1,0 +1,46 @@
+{
+  "items": [{
+    "station_id": "GHCND:US1COAD0208",
+    "station_name": "THORNTON 7.1 N, CO US",
+    "distance": 1.83
+  }, {
+    "station_id": "GHCND:US1COAD0039",
+    "station_name": "BRIGHTON 7.7 W, CO US",
+    "distance": 1.83
+  }, {
+    "station_id": "GHCND:US1COBR0028",
+    "station_name": "BROOMFIELD 3.9 NNE, CO US",
+    "distance": 2.44
+  }, {
+    "station_id": "GHCND:US1COBR0032",
+    "station_name": "BROOMFIELD 3.2 NNE, CO US",
+    "distance": 2.54
+  }, {
+    "station_id": "GHCND:US1COWE0186",
+    "station_name": "ERIE 2.6 S, CO US",
+    "distance": 2.56
+  }, {
+    "station_id": "GHCND:US1COWE0392",
+    "station_name": "ERIE 0.5 SE, CO US",
+    "distance": 2.64
+  }, {
+    "station_id": "GHCND:US1COAD0059",
+    "station_name": "TRN 2.3 NW, CO US",
+    "distance": 3.71
+  }, {
+    "station_id": "GHCND:US1COBR0023",
+    "station_name": "BROOMFIELD 1.6 ENE, CO US",
+    "distance": 3.79
+  }, {
+    "station_id": "GHCND:US1COWE0511",
+    "station_name": "ERIE 1.5 NNE, CO US",
+    "distance": 3.79
+  }, {
+    "station_id": "GHCND:US1COAD0134",
+    "station_name": "WESTMINSTER 4.8 NNE, CO US",
+    "distance": 4.02
+  }],
+  "first": {
+    "$ref": "https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/-105/40/10"
+  }
+}
