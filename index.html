@@ -257,11 +257,14 @@
         "esri/core/watchUtils",
         "dojo/query",
         "dojo/on",
+        "dojo/_base/declare",
         "dgrid/OnDemandGrid",
         "dgrid/extensions/ColumnHider",
         "dojo/store/Memory",
         "dstore/legacy/StoreAdapter",
         "dgrid/Selection",
+        "esri/request",
+        "esri/config",
 
         // Calcite Maps
         "calcite-maps/calcitemaps-v0.7",
@@ -283,11 +286,14 @@
                 watchUtils,
                 query,
                 on,
+                declare,
                 OnDemandGrid,
                 ColumnHider,
                 Memory,
                 StoreAdapter,
                 Selection,
+                esriRequest,
+                esriConfig,
                 CalciteMaps,
                 CalciteMapsArcGIS) {
 
@@ -296,6 +302,8 @@
          * App settings
          *
          ******************************************************************/
+
+        esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
 
         app = {
             center: [-40, 40],
@@ -311,7 +319,9 @@
             containerMap: "mapViewDiv",
             containerScene: "sceneViewDiv",
             activeView: null,
-            searchWidget: null
+            searchWidget: null,
+            serviceUrl: 'https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/',
+            numStations: 10
         };
 
         /******************************************************************
@@ -329,6 +339,13 @@
                 idProperty: "station_id"
             })
         });
+        const data = [
+            { 'station_id':1, 'name': 'one', 'distance':1.0}
+        ]
+        createGrid(gridFields);
+        dataStore.objectStore.data = data;
+        grid.set("collection", dataStore);
+
 
         // Map
         var map = new Map({
@@ -378,6 +395,29 @@
             view: app.activeView,
             container: "basemapPanelDiv"
         });
+
+        app.searchWidget.on('select-result', function(event){
+            getClosestStations(event.result.feature.geometry);
+        });
+
+
+        function getClosestStations(geometry) {
+            //https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/-105/40/10
+            var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+            url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy'
+            esriRequest(url).then(function(response) {
+                console.log('response', response);
+                var responseJSON = JSON.stringify(response, null, 2);
+                console.log(responseJSON);
+            });
+        };
+
+
+        function selectFeatureFromGrid(event) {
+            //
+        }
+
+
 
         /******************************************************************
          *
