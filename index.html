@@ -99,7 +99,7 @@
 </div>
 <div id="gridDisplay">
     <span class="info" id="featureCount"></span>
-    <div id="grid">GRID</div>
+    <div id="grid"></div>
 </div>
 <!-- /.calcite-map -->
 
@@ -258,6 +258,7 @@
         "dojo/query",
         "dojo/on",
         "dojo/_base/declare",
+        "dgrid/Grid",
         "dgrid/OnDemandGrid",
         "dgrid/extensions/ColumnHider",
         "dojo/store/Memory",
@@ -287,6 +288,7 @@
                 query,
                 on,
                 declare,
+                Grid,
                 OnDemandGrid,
                 ColumnHider,
                 Memory,
@@ -304,6 +306,29 @@
          ******************************************************************/
 
         esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
+
+
+        // create a new datastore for the on demandgrid
+        // will be used to display attributes of selected features
+        const dataStore = new StoreAdapter({
+            objectStore: new Memory({
+                idProperty: "station_id"
+            })
+        });
+
+        //dataStore.objectStore.data = data;
+        //grid.set("collection", dataStore);
+        var grid = new(declare([OnDemandGrid, Selection, ColumnHider]))({
+            columns: {
+                station_id: 'Id',
+                station_name: 'Name',
+                distance: 'Distance'
+            }
+        }, "grid");
+        grid.on('dgrid-select', selectFeatureFromGrid);
+
+
+
 
         app = {
             center: [-40, 40],
@@ -329,24 +354,6 @@
          * Create the map and scene view and ui components
          *
          ******************************************************************/
-
-        const gridFields = ["Id", "Name", "Distance"];
-
-        // create a new datastore for the on demandgrid
-        // will be used to display attributes of selected features
-        const dataStore = new StoreAdapter({
-            objectStore: new Memory({
-                idProperty: "station_id"
-            })
-        });
-        const data = [
-            { 'station_id':1, 'name': 'one', 'distance':1.0}
-        ]
-        createGrid(gridFields);
-        dataStore.objectStore.data = data;
-        grid.set("collection", dataStore);
-
-
         // Map
         var map = new Map({
                 basemap: app.basemap
@@ -404,13 +411,15 @@
         function getClosestStations(geometry) {
             //https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/-105/40/10
             var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-            url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy'
+            url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy';
             esriRequest(url).then(function(response) {
                 console.log('response', response);
                 var responseJSON = JSON.stringify(response, null, 2);
                 console.log(responseJSON);
+                console.log(response.data.items);
+                grid.renderArray(response.data.items);
             });
-        };
+        }
 
 
         function selectFeatureFromGrid(event) {
