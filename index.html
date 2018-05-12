@@ -306,6 +306,7 @@
          ******************************************************************/
 
         esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
+        esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
 
 
         // create a new datastore for the on demandgrid
@@ -345,7 +346,7 @@
             containerScene: "sceneViewDiv",
             activeView: null,
             searchWidget: null,
-            serviceUrl: 'https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/',
+            serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
             numStations: 10
         };
 
@@ -411,7 +412,7 @@
         function getClosestStations(geometry) {
             //https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/-105/40/10
             var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-            url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy';
+            //url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy';
             esriRequest(url).then(function(response) {
                 console.log('response', response);
                 var responseJSON = JSON.stringify(response, null, 2);
