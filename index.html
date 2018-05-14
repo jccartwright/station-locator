@@ -71,11 +71,11 @@
     </div>
     <!-- Nav -->
     <ul class="nav navbar-nav calcite-nav">
-        <li class="active"><a id="mapNav" class="hidden-xs hidden-sm" href="#mapTab" aria-controls="mapTab"
-                              aria-expanded="true" role="tab" data-toggle="tab" data-tooltip="tip" title="2D View"
-                              data-placement="bottom">Map</a></li>
-        <li><a id="sceneNav" class="hidden-xs hidden-sm" href="#sceneTab" aria-controls="sceneTab"
-               role="tab" data-toggle="tab" data-tooltip="tip" title="3D View" data-placement="bottom">Scene</a></li>
+        <!--<li class="active"><a id="mapNav" class="hidden-xs hidden-sm" href="#mapTab" aria-controls="mapTab"-->
+                              <!--aria-expanded="true" role="tab" data-toggle="tab" data-tooltip="tip" title="2D View"-->
+                              <!--data-placement="bottom">Map</a></li>-->
+        <!--<li><a id="sceneNav" class="hidden-xs hidden-sm" href="#sceneTab" aria-controls="sceneTab"-->
+               <!--role="tab" data-toggle="tab" data-tooltip="tip" title="3D View" data-placement="bottom">Scene</a></li>-->
         <li>
             <div class="calcite-navbar-search calcite-search-expander">
                 <div id="searchWidgetDiv"></div>
@@ -252,6 +252,11 @@
         "esri/Map",
         "esri/views/MapView",
         "esri/views/SceneView",
+        "esri/layers/MapImageLayer",
+        "esri/tasks/QueryTask",
+        "esri/tasks/support/Query",
+        "esri/Graphic",
+        "esri/geometry/support/webMercatorUtils",
         "esri/widgets/Search",
         "esri/widgets/BasemapGallery",
         "esri/core/watchUtils",
@@ -282,6 +287,11 @@
     ], function(Map,
                 MapView,
                 SceneView,
+                MapImageLayer,
+                QueryTask,
+                Query,
+                Graphic,
+                webMercatorUtils,
                 Search,
                 Basemaps,
                 watchUtils,
@@ -328,9 +338,6 @@
         }, "grid");
         grid.on('dgrid-select', selectFeatureFromGrid);
 
-
-
-
         app = {
             center: [-40, 40],
             scale: 50000000,
@@ -339,7 +346,7 @@
                 top: 50,
                 bottom: 0
             },
-            uiComponents: ["zoom", "compass", "attribution"],
+            uiComponents: ["zoom", "attribution"],
             mapView: null,
             sceneView: null,
             containerMap: "mapViewDiv",
@@ -347,8 +354,17 @@
             activeView: null,
             searchWidget: null,
             serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
-            numStations: 10
+            numStations: 10,
+            mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer'
         };
+
+        var queryTask = new QueryTask({
+            url: app.mapserviceUrl+'/0'
+        });
+        var querySupport = new Query();
+        querySupport.returnGeometry = true;
+        querySupport.outFields = ["*"];
+
 
         /******************************************************************
          *
@@ -357,8 +373,14 @@
          ******************************************************************/
         // Map
         var map = new Map({
-                basemap: app.basemap
-            });
+            basemap: app.basemap
+        });
+
+        var stationsLayer = new MapImageLayer({
+            url: app.mapserviceUrl,
+            minScale: 3000000
+        });
+        map.add(stationsLayer);
 
         // 2D view
         app.mapView = new MapView({
@@ -369,7 +391,31 @@
             padding: app.viewPadding,
             ui: {
                 components: app.uiComponents
-            }
+            },
+            popupTemplate: {
+                title: "{station_id}",
+                content: [{
+                    type: "text",
+                    text: "Category {Category} storm with that occurred at {ISO_time}."
+                }, {
+                    type: "fields",
+                    fieldInfos: [{
+                        fieldName: "wmo_pres",
+                        label: "Pressure"
+                    }, {
+                        fieldName: "wmo_wind",
+                        label: "Wind Speed (mph)"
+                    }]
+                }],
+                fieldInfos: [{
+                    filedName: "ISO_time",
+                    format: {
+                        dateFormat: "short-date-short-time"
+                    }
+                }]
+            },
+
+
         });
 
         CalciteMapsArcGIS.setPopupPanelSync(app.mapView);
@@ -410,21 +456,44 @@
 
 
         function getClosestStations(geometry) {
-            //https://www.test.ncdc.noaa.gov/ords/stations/ghcnd/-105/40/10
             var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-            //url = 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy';
             esriRequest(url).then(function(response) {
-                console.log('response', response);
                 var responseJSON = JSON.stringify(response, null, 2);
-                console.log(responseJSON);
-                console.log(response.data.items);
-                grid.renderArray(response.data.items);
+                dataStore.objectStore.data = response.data.items;
+                grid.set("collection", dataStore);
             });
         }
 
 
         function selectFeatureFromGrid(event) {
-            //
+
+            querySupport.where = "station_id = '"+event.rows[0].id+"'";
+            // When resolved, returns features and graphics that satisfy the query.
+            queryTask.execute(querySupport).then(function(results){
+
+                app.mapView.graphics.removeAll();
+
+                // create a new selected graphic
+                var selectedGraphic = new Graphic({
+                    geometry: webMercatorUtils.geographicToWebMercator(results.features[0].geometry),
+                    symbol: {
+                        type: "simple-marker",
+                        style: "circle",
+                        color: "orange",
+                        size: "12px", // pixels
+                        outline: { // autocasts as new SimpleLineSymbol()
+                            color: [255, 255, 0],
+                            width: 2 // points
+                        }
+                    }
+                });
+
+                // add the selected graphic to the view
+                // this graphic corresponds to the row that was clicked
+                app.mapView.graphics.add(selectedGraphic);
+            }).catch(function (error) {
+                console.error(error);
+            });
         }
 
 
