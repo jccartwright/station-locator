@@ -472,6 +472,7 @@
             queryTask.execute(querySupport).then(function(results){
 
                 app.mapView.graphics.removeAll();
+                app.mapView.graphics.add(app.searchWidget.resultGraphic);
 
                 // create a new selected graphic
                 var selectedGraphic = new Graphic({
