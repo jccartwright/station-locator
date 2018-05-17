@@ -228,6 +228,10 @@
     </div>
 </div>
 <!-- /.calcite-panels -->
+<button type="button" id="mapPointBtn" class="btn btn-default" aria-label="select point">
+    <span class="glyphicon glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+</button>
+
 
 <script type="text/javascript">
     var dojoConfig = {
@@ -256,6 +260,8 @@
         "esri/tasks/QueryTask",
         "esri/tasks/support/Query",
         "esri/Graphic",
+        "esri/widgets/Sketch/SketchViewModel",
+        "esri/layers/GraphicsLayer",
         "esri/geometry/support/webMercatorUtils",
         "esri/widgets/Search",
         "esri/widgets/BasemapGallery",
@@ -291,6 +297,8 @@
                 QueryTask,
                 Query,
                 Graphic,
+                SketchViewModel,
+                GraphicsLayer,
                 webMercatorUtils,
                 Search,
                 Basemaps,
@@ -318,6 +326,15 @@
         esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
         esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
 
+        const searchWidgetSymbol = {
+            "type":"esriPMS",
+            "angle":0,
+            "xoffset":0,
+            "yoffset":0,
+            "url":"https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
+            "height":24,
+            "width":24
+        }
 
         // create a new datastore for the on demandgrid
         // will be used to display attributes of selected features
@@ -376,6 +393,8 @@
             basemap: app.basemap
         });
 
+        var tempGraphicsLayer = new GraphicsLayer();
+
         var stationsLayer = new MapImageLayer({
             url: app.mapserviceUrl,
             minScale: 3000000
@@ -413,12 +432,36 @@
                         dateFormat: "short-date-short-time"
                     }
                 }]
-            },
+            }
+        });
+        app.mapView.when(function(){
+            app.mapView.ui.add("mapPointBtn", "top-left");
+            var sketchViewModel = new SketchViewModel({
+                view: app.mapView,
+                layer: tempGraphicsLayer,
+                pointSymbol: pointSymbol
+            });
 
-
+            var drawPointButton = document.getElementById("mapPointBtn");
+            drawPointButton.onclick = function() {
+                // set the sketch to create a point geometry
+                sketchViewModel.create("point");
+            };
         });
 
         CalciteMapsArcGIS.setPopupPanelSync(app.mapView);
+
+
+        var pointSymbol = { // symbol used for points
+            type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+            style: "square",
+            color: "#8A2BE2",
+            size: "16px",
+            outline: { // autocasts as new SimpleLineSymbol()
+                color: [255, 255, 255],
+                width: 3 // points
+            }
+        };
 
         // 3D view
         app.sceneView = new SceneView({
@@ -451,6 +494,7 @@
         });
 
         app.searchWidget.on('select-result', function(event){
+            console.log(JSON.stringify(app.searchWidget.resultGraphic.toJSON()));
             getClosestStations(event.result.feature.geometry);
         });
 
