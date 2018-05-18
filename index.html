@@ -260,6 +260,7 @@
         "esri/tasks/QueryTask",
         "esri/tasks/support/Query",
         "esri/Graphic",
+        "esri/symbols/Symbol",
         "esri/widgets/Sketch/SketchViewModel",
         "esri/layers/GraphicsLayer",
         "esri/geometry/support/webMercatorUtils",
@@ -297,6 +298,7 @@
                 QueryTask,
                 Query,
                 Graphic,
+                Symbol,
                 SketchViewModel,
                 GraphicsLayer,
                 webMercatorUtils,
@@ -326,19 +328,10 @@
         esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
         esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
 
-        const searchWidgetSymbol = {
-            "type":"esriPMS",
-            "angle":0,
-            "xoffset":0,
-            "yoffset":0,
-            "url":"https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
-            "height":24,
-            "width":24
-        }
 
         // create a new datastore for the on demandgrid
         // will be used to display attributes of selected features
-        const dataStore = new StoreAdapter({
+        var dataStore = new StoreAdapter({
             objectStore: new Memory({
                 idProperty: "station_id"
             })
@@ -388,12 +381,16 @@
          * Create the map and scene view and ui components
          *
          ******************************************************************/
+        var tempGraphicsLayer = new GraphicsLayer();
+        var updateGraphic;
+
         // Map
         var map = new Map({
-            basemap: app.basemap
+            basemap: app.basemap,
+            layers: [tempGraphicsLayer]
         });
 
-        var tempGraphicsLayer = new GraphicsLayer();
+
 
         var stationsLayer = new MapImageLayer({
             url: app.mapserviceUrl,
@@ -411,6 +408,7 @@
             ui: {
                 components: app.uiComponents
             },
+            //TODO fix template
             popupTemplate: {
                 title: "{station_id}",
                 content: [{
@@ -434,35 +432,51 @@
                 }]
             }
         });
+
         app.mapView.when(function(){
             app.mapView.ui.add("mapPointBtn", "top-left");
+
             var sketchViewModel = new SketchViewModel({
                 view: app.mapView,
                 layer: tempGraphicsLayer,
                 pointSymbol: pointSymbol
             });
+            sketchViewModel.on("draw-complete", addGraphic);
 
             var drawPointButton = document.getElementById("mapPointBtn");
             drawPointButton.onclick = function() {
                 // set the sketch to create a point geometry
                 sketchViewModel.create("point");
             };
+
+
+            function addGraphic(evt) {
+                console.log('inside addGraphic...');
+                tempGraphicsLayer.removeAll();
+
+                var graphic = new Graphic({
+                    geometry: evt.geometry,
+                    symbol: pointSymbol
+                });
+
+                tempGraphicsLayer.add(graphic);
+
+                app.mapView.goTo({target: evt.geometry, zoom: 10} );
+                getClosestStations(evt.geometry);
+            }
+
         });
 
         CalciteMapsArcGIS.setPopupPanelSync(app.mapView);
 
-
-        var pointSymbol = { // symbol used for points
-            type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
-            style: "square",
-            color: "#8A2BE2",
-            size: "16px",
-            outline: { // autocasts as new SimpleLineSymbol()
-                color: [255, 255, 255],
-                width: 3 // points
-            }
+        //match the one used by the Search widget
+        var pointSymbol = {
+            "type": "picture-marker",
+            "url": "https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
+            "height": 24,
+            "width": 24
         };
-
+/*
         // 3D view
         app.sceneView = new SceneView({
             container: app.containerScene,
@@ -474,7 +488,7 @@
                 components: app.uiComponents
             }
         });
-
+*/
         CalciteMapsArcGIS.setPopupPanelSync(app.sceneView);
 
         // Set the active view to scene
@@ -482,7 +496,8 @@
 
         // Create the search widget and add it to the navbar instead of view
         app.searchWidget = new Search({
-            view: app.activeView
+            view: app.activeView,
+            popupOpenOnSelect: false
         }, "searchWidgetDiv");
 
         CalciteMapsArcGIS.setSearchExpandEvents(app.searchWidget);
