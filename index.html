@@ -71,11 +71,6 @@
     </div>
     <!-- Nav -->
     <ul class="nav navbar-nav calcite-nav">
-        <!--<li class="active"><a id="mapNav" class="hidden-xs hidden-sm" href="#mapTab" aria-controls="mapTab"-->
-                              <!--aria-expanded="true" role="tab" data-toggle="tab" data-tooltip="tip" title="2D View"-->
-                              <!--data-placement="bottom">Map</a></li>-->
-        <!--<li><a id="sceneNav" class="hidden-xs hidden-sm" href="#sceneTab" aria-controls="sceneTab"-->
-               <!--role="tab" data-toggle="tab" data-tooltip="tip" title="3D View" data-placement="bottom">Scene</a></li>-->
         <li>
             <div class="calcite-navbar-search calcite-search-expander">
                 <div id="searchWidgetDiv"></div>
@@ -91,9 +86,6 @@
     <div id="tabContainer" class="tab-content">
         <div id="mapTab" class="tab-pane fade in active" role="tabpanel">
             <div id="mapViewDiv"></div>
-        </div>
-        <div id="sceneTab" class="tab-pane fade" role="tabpanel">
-            <div id="sceneViewDiv"></div>
         </div>
     </div>
 </div>
@@ -117,20 +109,7 @@
         </div>
         <div id="collapseInfo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingInfo">
             <div class="panel-body">
-                <p>The main styles used in this app are:</p>
-                Body
-                <li>calcite-nav-top</li>
-                <br>
-                Nav
-                <li>calcite-bgcolor-dark-blue</li>
-                <li>calcite-text-light</li>
-                <br>
-                Dropdown
-                <li>calcite-menu-drawer</li>
-                <br>
-                Panels
-                <li>calcite-panels-right</li>
-                <li>calcite-bg-custom</li>
+                <p>This map allows the user to find the nearest stations to the given address or point on the map</p>
             </div>
         </div>
     </div>
@@ -167,57 +146,44 @@
             <div class="panel-body">
                 <div class="form-horizontal">
 
-                    <!-- Theme -->
+                    <!-- Station Network -->
 
                     <div class="form-group">
-                        <label for="settingsTheme" class="col-xs-3 control-label">Theme</label>
+                        <label for="settingsStations" class="col-xs-3 control-label">Station Network</label>
                         <div class="col-xs-9">
-                            <select id="settingsTheme" class="form-control">
-                                <option value="calcite-dark" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-dark" selected>Calcite Dark</option>
-                                <option value="calcite-light" data-textcolor="calcite-text-dark" data-bgcolor="calcite-bg-light">Calcte Light</option>
+                            <select id="settingsStations" class="form-control">
+                                <option value="ghcnd" selected>Global Historical Climatology Network Daily</option>
+                                <option value="gsom" disabled>Global Summary of the Month</option>
+                                <option value="gsoy" disabled>Global Summary of the Year</option>
+                                <option value="gsod" disabled>Global Summary of the Day</option>
+                                <option value="lcd" disabled>Local Climatological Data</option>
+                                <option value="precip15" disabled>Precipitation 15 minute</option>
+                                <option value="precipHrly" disabled>Precipitation Hourly</option>
+                                <option value="globalHrly" disabled>Global Hourly</option>
+                                <option value="crn" disabled>Climate Reference Network</option>
+                                <option value="normalsHrly" disabled>Normals Hourly</option>
+                                <option value="normalsDaily" disabled>Normals Daily</option>
+                                <option value="normalsMonthly" disabled>Normals Monthly</option>
+                                <option value="normalsAnnual" disabled>Normals Annual</option>
+                                <option value="nexradII" disabled>NEXRAD II</option>
+                                <option value="nexradIII" disabled>NEXRAD III</option>
+                                <option value="dailySummaries" disabled>Daily Summaries</option>
+                                <option value="monthlySummaries" disabled>Monthly Summaries</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Color -->
+                    <!-- number of results -->
 
                     <div class="form-group">
-                        <label for="settingsColor" class="col-xs-3 control-label">Color</label>
+                        <label for="settingsNumResults" class="col-xs-3 control-label">Number of Results</label>
                         <div class="col-xs-9">
-                            <select id="settingsColor" class="form-control">
-                                <option value="" data-theme="calcite-theme-light">Calcite Default</option>
-                                <option value="calcite-bgcolor-dark-blue" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Dark Blue</option>
-                                <option value="calcite-bgcolor-dark-green" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Dark Green</option>
-                                <option value="calcite-bgcolor-dark-brown" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Dark Brown </option>
-                                <option value="calcite-bgcolor-dark-red" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Dark Red</option>
-                                <option value="calcite-bgcolor-darkest-grey" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Darkest Grey</option>
-                                <option value="calcite-bgcolor-lightest-grey" data-textcolor="calcite-text-dark" data-bgcolor="calcite-bg-custom">Calcite Lightest Grey</option>
-                                <option value="calcite-bgcolor-blue-75" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Blue 75%</option>
-                                <option value="calcite-bgcolor-black-75" data-textcolor="calcite-text-light" data-bgcolor="calcite-bg-custom">Calcite Black 75%</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Widgets -->
-
-                    <div class="form-group">
-                        <label for="settingsWidgets" class="col-xs-3 control-label">Widgets</label>
-                        <div class="col-xs-9">
-                            <select id="settingsWidgets" class="form-control">
-                                <option value="calcite-widgets-dark">Calcite Dark</option>
-                                <option value="calcite-widgets-light" selected>Calcite Light</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Layout -->
-
-                    <div class="form-group">
-                        <label for="settingsLayout" class="col-xs-3 control-label">Layout</label>
-                        <div class="col-xs-9">
-                            <select id="settingsLayout" class="form-control">
-                                <option value="calcite-nav-top" data-nav="navbar-fixed-top" selected>Top</option>
-                                <option value="calcite-nav-bottom" data-nav="navbar-fixed-bottom">Bottom</option>
+                            <select id="settingsNumResults" class="form-control">
+                                <option value="1">1</option>
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="100">100</option>
                             </select>
                         </div>
                     </div>
@@ -239,10 +205,10 @@
             name: "bootstrap",
             location: "https://esri.github.io/calcite-maps/dist/vendor/dojo-bootstrap"
         },
-            {
-                name: "calcite-maps",
-                location: "https://esri.github.io/calcite-maps/dist/js/dojo"
-            }]
+        {
+            name: "calcite-maps",
+            location: "https://esri.github.io/calcite-maps/dist/js/dojo"
+        }]
     };
 </script>
 
@@ -319,18 +285,41 @@
                 CalciteMaps,
                 CalciteMapsArcGIS) {
 
+        //required for ORDS webservice
+        esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
+        esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
+
         /******************************************************************
          *
          * App settings
          *
          ******************************************************************/
+        app = {
+            center: [-40, 40],
+            scale: 50000000,
+            basemap: "streets",
+            viewPadding: {
+                top: 50,
+                bottom: 0
+            },
+            uiComponents: ["zoom", "attribution"],
+            mapView: null,
+            containerMap: "mapViewDiv",
+            activeView: null,
+            searchWidget: null,
+            serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
+            //serviceUrl: 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy',
+            numStations: 10,
+            mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer'
+        };
 
-        esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
-        esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
 
-
-        // create a new datastore for the on demandgrid
-        // will be used to display attributes of selected features
+        /******************************************************************
+         *
+         * setup Grid
+         *
+         ******************************************************************/
+        // create a new datastore for the on-demand grid. used to display list of stations
         var dataStore = new StoreAdapter({
             objectStore: new Memory({
                 idProperty: "station_id"
@@ -348,27 +337,7 @@
         }, "grid");
         grid.on('dgrid-select', selectFeatureFromGrid);
 
-        app = {
-            center: [-40, 40],
-            scale: 50000000,
-            basemap: "streets",
-            viewPadding: {
-                top: 50,
-                bottom: 0
-            },
-            uiComponents: ["zoom", "attribution"],
-            mapView: null,
-            sceneView: null,
-            containerMap: "mapViewDiv",
-            containerScene: "sceneViewDiv",
-            activeView: null,
-            searchWidget: null,
-            //serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
-            serviceUrl: 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy',
-            numStations: 10,
-            mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer'
-        };
-
+        //Query task used to retrieve details of selected station
         var queryTask = new QueryTask({
             url: app.mapserviceUrl+'/0'
         });
@@ -377,9 +346,56 @@
         querySupport.outFields = ["*"];
 
 
+        //show the station from the selected grid row on the map
+        function selectFeatureFromGrid(event) {
+            querySupport.where = "station_id = '"+event.rows[0].id+"'";
+            // When resolved, returns features and graphics that satisfy the query.
+            queryTask.execute(querySupport).then(function(results){
+
+                app.mapView.graphics.removeAll();
+                app.mapView.graphics.add(app.searchWidget.resultGraphic);
+
+                // create a new selected graphic
+                var selectedGraphic = new Graphic({
+                    geometry: webMercatorUtils.geographicToWebMercator(results.features[0].geometry),
+                    symbol: {
+                        type: "simple-marker",
+                        style: "circle",
+                        color: "orange",
+                        size: "12px", // pixels
+                        outline: { // autocasts as new SimpleLineSymbol()
+                            color: [255, 255, 0],
+                            width: 2 // points
+                        }
+                    }
+                });
+
+                // add the selected graphic to the view
+                // this graphic corresponds to the row that was clicked
+                app.mapView.graphics.add(selectedGraphic);
+            }).catch(function (error) {
+                console.error(error);
+            });
+        }
+
+
+        //call Oracle REST service and populate grid
+        function getClosestStations(geometry) {
+            var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+            url = app.serviceUrl;
+            esriRequest(url).then(function(response) {
+                var responseJSON = JSON.stringify(response, null, 2);
+                dataStore.objectStore.data = response.data.items;
+                grid.set("collection", dataStore);
+            });
+        }
+
+
+
+
         /******************************************************************
          *
-         * Create the map and scene view and ui components
+         * Create the map view and ui components
          *
          ******************************************************************/
         var tempGraphicsLayer = new GraphicsLayer();
@@ -392,15 +408,14 @@
             "width": 24
         };
 
-        // var stationsLayer = new MapImageLayer({
-        //     url: app.mapserviceUrl,
-        //     minScale: 3000000
-        // });
+        var stationsLayer = new MapImageLayer({
+            url: app.mapserviceUrl,
+            minScale: 3000000
+        });
 
         var map = new Map({
             basemap: app.basemap,
-//            layers: [stationsLayer, tempGraphicsLayer]
-            layers: [tempGraphicsLayer]
+           layers: [stationsLayer, tempGraphicsLayer]
         });
 
         app.mapView = new MapView({
@@ -448,6 +463,11 @@
         });
 
 
+        /******************************************************************
+         *
+         * setup widgets
+         *
+         ******************************************************************/
         // Create the search widget and add it to the navbar instead of view
         app.searchWidget = new Search({
             view: app.activeView,
@@ -456,227 +476,32 @@
 
         CalciteMapsArcGIS.setSearchExpandEvents(app.searchWidget);
 
-        // Create basemap widget
-        app.basemapWidget = new Basemaps({
-            view: app.activeView,
-            container: "basemapPanelDiv"
-        });
-
         app.searchWidget.on('select-result', function(event){
             getClosestStations(event.result.feature.geometry);
         });
 
-
-        //call Oracle REST service and populate grid
-        function getClosestStations(geometry) {
-            var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-            url = app.serviceUrl;
-            esriRequest(url).then(function(response) {
-                var responseJSON = JSON.stringify(response, null, 2);
-                dataStore.objectStore.data = response.data.items;
-                grid.set("collection", dataStore);
-            });
-        }
-
-
-        //show the station from the selected grid row on the map
-        function selectFeatureFromGrid(event) {
-            querySupport.where = "station_id = '"+event.rows[0].id+"'";
-            // When resolved, returns features and graphics that satisfy the query.
-            queryTask.execute(querySupport).then(function(results){
-
-                app.mapView.graphics.removeAll();
-                app.mapView.graphics.add(app.searchWidget.resultGraphic);
-
-                // create a new selected graphic
-                var selectedGraphic = new Graphic({
-                    geometry: webMercatorUtils.geographicToWebMercator(results.features[0].geometry),
-                    symbol: {
-                        type: "simple-marker",
-                        style: "circle",
-                        color: "orange",
-                        size: "12px", // pixels
-                        outline: { // autocasts as new SimpleLineSymbol()
-                            color: [255, 255, 0],
-                            width: 2 // points
-                        }
-                    }
-                });
-
-                // add the selected graphic to the view
-                // this graphic corresponds to the row that was clicked
-                app.mapView.graphics.add(selectedGraphic);
-            }).catch(function (error) {
-                console.error(error);
-            });
-        }
-
+        // Create basemap widget
+        app.basemapWidget = new Basemaps({
+            view: app.mapView,
+            container: "basemapPanelDiv"
+        });
 
 
         /******************************************************************
          *
-         * Synchronize the view, search and popup
+         * apply changes made in the settings widget
          *
          ******************************************************************/
-/*
-        // Views
-        function setActiveView(view) {
-            app.activeView = view;
-        }
-
-        function syncViews(fromView, toView) {
-            var viewPt = fromView.viewpoint.clone();
-            fromView.container = null;
-            if (fromView.type === "3d") {
-                toView.container = app.containerMap;
-            } else {
-                toView.container = app.containerScene;
-            }
-            toView.padding = app.viewPadding;
-            toView.viewpoint = viewPt;
-        }
-
-        // Search Widget
-        function syncSearch(view) {
-            watchUtils.whenTrueOnce(view, "ready", function() {
-                app.searchWidget.view = view;
-                if (app.searchWidget.selectedResult) {
-                    app.searchWidget.search(app.searchWidget.selectedResult.name)
-                }
-            });
-        }
-
-        // Tab - toggle between map and scene view
-        query(".calcite-navbar li a[data-toggle='tab']").on("click", function(
-            e) {
-            if (e.target.text.indexOf("Map") > -1) {
-                syncViews(app.sceneView, app.mapView);
-                setActiveView(app.mapView);
-            } else {
-                syncViews(app.mapView, app.sceneView);
-                setActiveView(app.sceneView);
-            }
-            syncSearch(app.activeView);
-        });
-*/
-        /******************************************************************
-         *
-         * Apply Calcite Maps CSS classes to change application on the fly
-         *
-         * For more information about the CSS styles or Sass build visit:
-         * http://github.com/esri/calcite-maps
-         *
-         ******************************************************************/
-/*
-        var cssSelectorUI = ".calcite-navbar, .calcite-panels",
-            cssSelectorMap = ".calcite-map";
-
-        // Theme - light (default) or dark theme
-        query("#settingsTheme").on("change", function(e) {
-            var textColor = e.target.options[e.target.selectedIndex].dataset
-                    .textcolor,
-                bgColor = e.target.options[e.target.selectedIndex].dataset.bgcolor;
-            query(cssSelectorUI).removeClass(
-                "calcite-text-dark calcite-text-light calcite-bg-dark calcite-bg-light calcite-bg-custom"
-            ).addClass(textColor + " " + bgColor);
-            query(cssSelectorUI).removeClass(
-                "calcite-bgcolor-dark-blue calcite-bgcolor-blue-75 calcite-bgcolor-dark-green calcite-bgcolor-dark-brown calcite-bgcolor-darkest-grey calcite-bgcolor-lightest-grey calcite-bgcolor-black-75 calcite-bgcolor-dark-red"
-            ).addClass(bgColor);
-            query("#settingsColor").attr("value", "");
+        query("#settingsNumResults").on("change", function(e) {
+            app.numStations = e.target.options[e.target.selectedIndex].value;
+            console.log(app.numStations);
         });
 
-        // Color - custom color
-        query("#settingsColor").on("change", function(e) {
-            var customColor = e.target.value,
-                textColor = e.target.options[e.target.selectedIndex].dataset.textcolor,
-                bgColor = e.target.options[e.target.selectedIndex].dataset.bgcolor;
-            query(cssSelectorUI).removeClass(
-                "calcite-text-dark calcite-text-light calcite-bg-dark calcite-bg-light calcite-bg-custom"
-            ).addClass(textColor + " " + bgColor);
-            query(cssSelectorUI).removeClass(
-                "calcite-bgcolor-dark-blue calcite-bgcolor-blue-75 calcite-bgcolor-dark-green calcite-bgcolor-dark-brown calcite-bgcolor-darkest-grey calcite-bgcolor-lightest-grey calcite-bgcolor-black-75 calcite-bgcolor-dark-red"
-            ).addClass(customColor);
-            if (!customColor) {
-                on.emit(query("#settingsTheme")[0], "change", {
-                    bubbles: true,
-                    cancelable: true
-                });
-            }
+        query("#settingsStations").on("change", function(e) {
+            //TODO. change mapservice, webservice URLs
+            console.log(e.target.options[e.target.selectedIndex].value);
         });
 
-        // Widgets - light (default) or dark theme
-        query("#settingsWidgets").on("change", function(e) {
-            var theme = e.target.value;
-            query(cssSelectorMap).removeClass(
-                "calcite-widgets-dark calcite-widgets-light").addClass(
-                theme);
-        });
-
-        // Layout - top or bottom nav position
-        query("#settingsLayout").on("change", function(e) {
-            var layout = e.target.value;
-            var layoutNav = e.target.options[e.target.selectedIndex].dataset
-                .nav;
-            query("body").removeClass("calcite-nav-bottom calcite-nav-top")
-                .addClass(layout);
-            query("nav").removeClass("navbar-fixed-bottom navbar-fixed-top")
-                .addClass(layoutNav);
-            setViewPadding(layout);
-        });
-
-        // Basemap events
-        query("#selectBasemapPanel").on("change", function(e) {
-            app.mapView.map.basemap = e.target.options[e.target.selectedIndex]
-                .dataset.vector;
-            app.sceneView.map.basemap = e.target.value;
-        });
-
-        // Set view padding for widgets based on navbar position
-        function setViewPadding(layout) {
-            var padding, uiPadding;
-            // Top
-            if (layout === "calcite-nav-top") {
-                padding = {
-                    padding: {
-                        top: 50,
-                        bottom: 0
-                    }
-                };
-                uiPadding = {
-                    padding: {
-                        top: 15,
-                        right: 15,
-                        bottom: 30,
-                        left: 15
-                    }
-                };
-            } else { // Bottom
-                padding = {
-                    padding: {
-                        top: 0,
-                        bottom: 50
-                    }
-                };
-                uiPadding = {
-                    padding: {
-                        top: 30,
-                        right: 15,
-                        bottom: 15,
-                        left: 15
-                    }
-                };
-            }
-            app.mapView.set(padding);
-            app.mapView.ui.set(uiPadding);
-            app.sceneView.set(padding);
-            app.sceneView.ui.set(uiPadding);
-            // Reset popup
-            if (app.activeView.popup.visible && app.activeView.popup.dockEnabled) {
-                app.activeView.popup.visible = false;
-                app.activeView.popup.visible = true;
-            }
-        }
-        */
     });
 
 </script>
