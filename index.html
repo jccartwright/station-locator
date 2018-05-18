@@ -363,7 +363,8 @@
             containerScene: "sceneViewDiv",
             activeView: null,
             searchWidget: null,
-            serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
+            //serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
+            serviceUrl: 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy',
             numStations: 10,
             mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer'
         };
@@ -382,23 +383,26 @@
          *
          ******************************************************************/
         var tempGraphicsLayer = new GraphicsLayer();
-        var updateGraphic;
 
-        // Map
+        //match the one used by the Search widget
+        var pointSymbol = {
+            "type": "picture-marker",
+            "url": "https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
+            "height": 24,
+            "width": 24
+        };
+
+        // var stationsLayer = new MapImageLayer({
+        //     url: app.mapserviceUrl,
+        //     minScale: 3000000
+        // });
+
         var map = new Map({
             basemap: app.basemap,
+//            layers: [stationsLayer, tempGraphicsLayer]
             layers: [tempGraphicsLayer]
         });
 
-
-
-        var stationsLayer = new MapImageLayer({
-            url: app.mapserviceUrl,
-            minScale: 3000000
-        });
-        map.add(stationsLayer);
-
-        // 2D view
         app.mapView = new MapView({
             container: app.containerMap,
             map: map,
@@ -407,29 +411,6 @@
             padding: app.viewPadding,
             ui: {
                 components: app.uiComponents
-            },
-            //TODO fix template
-            popupTemplate: {
-                title: "{station_id}",
-                content: [{
-                    type: "text",
-                    text: "Category {Category} storm with that occurred at {ISO_time}."
-                }, {
-                    type: "fields",
-                    fieldInfos: [{
-                        fieldName: "wmo_pres",
-                        label: "Pressure"
-                    }, {
-                        fieldName: "wmo_wind",
-                        label: "Wind Speed (mph)"
-                    }]
-                }],
-                fieldInfos: [{
-                    filedName: "ISO_time",
-                    format: {
-                        dateFormat: "short-date-short-time"
-                    }
-                }]
             }
         });
 
@@ -441,7 +422,7 @@
                 layer: tempGraphicsLayer,
                 pointSymbol: pointSymbol
             });
-            sketchViewModel.on("draw-complete", addGraphic);
+            sketchViewModel.on("draw-complete", addMapPoint);
 
             var drawPointButton = document.getElementById("mapPointBtn");
             drawPointButton.onclick = function() {
@@ -450,8 +431,7 @@
             };
 
 
-            function addGraphic(evt) {
-                console.log('inside addGraphic...');
+            function addMapPoint(evt) {
                 tempGraphicsLayer.removeAll();
 
                 var graphic = new Graphic({
@@ -462,37 +442,11 @@
                 tempGraphicsLayer.add(graphic);
 
                 app.mapView.goTo({target: evt.geometry, zoom: 10} );
+
                 getClosestStations(evt.geometry);
             }
-
         });
 
-        CalciteMapsArcGIS.setPopupPanelSync(app.mapView);
-
-        //match the one used by the Search widget
-        var pointSymbol = {
-            "type": "picture-marker",
-            "url": "https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
-            "height": 24,
-            "width": 24
-        };
-/*
-        // 3D view
-        app.sceneView = new SceneView({
-            container: app.containerScene,
-            map: map,
-            center: app.center,
-            scale: app.scale,
-            padding: app.viewPadding,
-            ui: {
-                components: app.uiComponents
-            }
-        });
-*/
-        CalciteMapsArcGIS.setPopupPanelSync(app.sceneView);
-
-        // Set the active view to scene
-        setActiveView(app.mapView);
 
         // Create the search widget and add it to the navbar instead of view
         app.searchWidget = new Search({
@@ -509,13 +463,14 @@
         });
 
         app.searchWidget.on('select-result', function(event){
-            console.log(JSON.stringify(app.searchWidget.resultGraphic.toJSON()));
             getClosestStations(event.result.feature.geometry);
         });
 
 
+        //call Oracle REST service and populate grid
         function getClosestStations(geometry) {
             var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+            url = app.serviceUrl;
             esriRequest(url).then(function(response) {
                 var responseJSON = JSON.stringify(response, null, 2);
                 dataStore.objectStore.data = response.data.items;
@@ -524,8 +479,8 @@
         }
 
 
+        //show the station from the selected grid row on the map
         function selectFeatureFromGrid(event) {
-
             querySupport.where = "station_id = '"+event.rows[0].id+"'";
             // When resolved, returns features and graphics that satisfy the query.
             queryTask.execute(querySupport).then(function(results){
@@ -563,7 +518,7 @@
          * Synchronize the view, search and popup
          *
          ******************************************************************/
-
+/*
         // Views
         function setActiveView(view) {
             app.activeView = view;
@@ -603,7 +558,7 @@
             }
             syncSearch(app.activeView);
         });
-
+*/
         /******************************************************************
          *
          * Apply Calcite Maps CSS classes to change application on the fly
@@ -612,7 +567,7 @@
          * http://github.com/esri/calcite-maps
          *
          ******************************************************************/
-
+/*
         var cssSelectorUI = ".calcite-navbar, .calcite-panels",
             cssSelectorMap = ".calcite-map";
 
@@ -721,48 +676,9 @@
                 app.activeView.popup.visible = true;
             }
         }
-
-
-        /************************************************
-         * Creates a new grid. Loops through poverty
-         * csvLayer's fields and creates grid columns
-         * Grid with selection and columnhider extensions
-         *************************************************/
-        function createGrid(fields) {
-            var columns = fields.filter(function(field, i) {
-                if (gridFields.indexOf(field.name) !== -1) {
-                    return field;
-                }
-            }).map(function(field) {
-                if (field.name === "station_id") {
-                    return {
-                        field: field.name,
-                        label: field.name,
-                        sortable: true,
-                        hidden: true
-                    };
-                } else {
-                    return {
-                        field: field.name,
-                        label: field.alias,
-                        sortable: true
-                    };
-                }
-            });
-
-            // create a new onDemandGrid with its selection and columnhider
-            // extensions. Set the columns of the grid to display attributes
-            // the hurricanes cvslayer
-            grid = new(declare([OnDemandGrid, Selection, ColumnHider]))({
-                columns: columns
-            }, "grid");
-
-            // add a row-click listener on the grid. This will be used
-            // to highlight the corresponding feature on the view
-            grid.on('dgrid-select', selectFeatureFromGrid);
-        }
-
+        */
     });
+
 </script>
 
 </body>
