@@ -382,7 +382,6 @@
         //call Oracle REST service and populate grid
         function getClosestStations(geometry) {
             var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-            url = app.serviceUrl;
             esriRequest(url).then(function(response) {
                 var responseJSON = JSON.stringify(response, null, 2);
                 dataStore.objectStore.data = response.data.items;
