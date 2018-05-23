@@ -8,6 +8,8 @@ require([
     "esri/layers/MapImageLayer",
     "esri/tasks/QueryTask",
     "esri/tasks/support/Query",
+    "esri/tasks/IdentifyTask",
+    "esri/tasks/support/IdentifyParameters",
     "esri/Graphic",
     "esri/symbols/Symbol",
     "esri/widgets/Sketch/SketchViewModel",
@@ -18,7 +20,9 @@ require([
     "esri/core/watchUtils",
     "dojo/query",
     "dojo/on",
+    "dojo/dom",
     "dojo/_base/declare",
+    "dojo/_base/array",
     "dgrid/Grid",
     "dgrid/OnDemandGrid",
     "dgrid/extensions/ColumnHider",
@@ -39,6 +43,8 @@ require([
             MapImageLayer,
             QueryTask,
             Query,
+            IdentifyTask,
+            IdentifyParameters,
             Graphic,
             Symbol,
             SketchViewModel,
@@ -49,7 +55,9 @@ require([
             watchUtils,
             query,
             on,
+            dom,
             declare,
+            arrayUtils,
             Grid,
             OnDemandGrid,
             ColumnHider,
@@ -70,7 +78,7 @@ require([
      *
      ******************************************************************/
     app = {
-        center: [-40, 40],
+        center: [-82.56, 35.38],
         scale: 50000000,
         basemap: "streets",
         viewPadding: {
@@ -192,7 +200,9 @@ require([
         }
     });
 
+
     app.mapView.when(function(){
+        //draw point
         app.mapView.ui.add("mapPointBtn", "top-left");
 
         var sketchViewModel = new SketchViewModel({
@@ -210,6 +220,18 @@ require([
             // set the sketch to create a point geometry
             sketchViewModel.create("point");
         };
+
+        //Identify
+        app.mapView.on('click', executeIdentifyTask);
+
+        app.identifyTask = new IdentifyTask(app.mapserviceUrl);
+        app.identifyParams = new IdentifyParameters();
+        app.identifyParams.tolerance = 3;
+        //default to GHCN. allow user to choose
+        app.identifyParams.layerIds = [0];
+        app.identifyParams.layerOption = 'top';
+        app.identifyParams.width = app.mapView.width;
+        app.identifyParams.height = app.mapView.height;
     });
 
 
@@ -282,6 +304,40 @@ require([
             grid.set("collection", dataStore);
         });
     }
+
+
+    function executeIdentifyTask(event) {
+        app.identifyParams.geometry = event.mapPoint;
+        app.identifyParams.mapExtent = app.mapView.extent;
+        // dom.byId(app.containerMap).style.cursor = "wait";
+
+        app.identifyTask.execute(app.identifyParams).then(function(response) {
+            var results = response.results;
+            console.log(results);
+
+            return arrayUtils.map(results, function(result) {
+                var feature = result.feature;
+                var layerName = result.layerName;
+                feature.attributes.layerName = layerName;
+                feature.popupTemplate = {
+                    title: '{STATION_ID}',
+                    content: '<b>Name:</b>{STATION_NAME} <br><b> Date Range:</b> {DATA_BEGIN_DATE} - {DATA_END_DATE}'
+                }
+                return(feature);
+           })
+        }).then(showPopup);
+
+
+        function showPopup(response) {
+            if (response.length > 0) {
+                app.mapView.popup.open({
+                    features: response,
+                    location: event.mapPoint
+                })
+            }
+        }
+    }
+
 
 
 });
