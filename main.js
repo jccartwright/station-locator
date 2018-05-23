@@ -62,7 +62,6 @@ require([
             CalciteMapsArcGIS) {
 
     //required for ORDS webservice
-    esriConfig.request.corsEnabledServers.push('https://maps.ngdc.noaa.gov');
     esriConfig.request.corsEnabledServers.push('https://www.ncdc.noaa.gov');
 
     /******************************************************************
@@ -84,12 +83,33 @@ require([
         activeView: null,
         searchWidget: null,
         serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
-        //serviceUrl: 'https://maps.ngdc.noaa.gov/mapviewer-support/stations/ghcnd.groovy',
         numStations: 10,
         mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer',
-        searchPointGraphic: null,
-        selectedStationGraphic: null
+        searchPointSymbol: null,
+        selectedPointSymbol: null,
+        searchPointGraphic: null
     };
+
+    //match the one used by the Search widget
+    app.searchPointSymbol = {
+        "type": "picture-marker",
+        "url": "https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
+        "height": 24,
+        "width": 24
+    };
+
+    app.selectedPointSymbol = {
+        type: "simple-marker",
+        style: "circle",
+        color: "orange",
+        size: "12px",
+        outline: { // autocasts as new SimpleLineSymbol()
+            color: [255, 255, 0],
+            width: 2 // points
+        }
+    };
+
+
 
 
     /******************************************************************
@@ -135,34 +155,13 @@ require([
             // create a new selected graphic
             var selectedGraphic = new Graphic({
                 geometry: webMercatorUtils.geographicToWebMercator(results.features[0].geometry),
-                symbol: {
-                    type: "simple-marker",
-                    style: "circle",
-                    color: "orange",
-                    size: "12px", // pixels
-                    outline: { // autocasts as new SimpleLineSymbol()
-                        color: [255, 255, 0],
-                        width: 2 // points
-                    }
-                }
+                symbol: app.selectedPointSymbol
             });
 
-            // add the selected graphic to the view
-            // this graphic corresponds to the row that was clicked
+            // graphic corresponds to the row that was clicked
             app.mapView.graphics.add(selectedGraphic);
         }).catch(function (error) {
             console.error(error);
-        });
-    }
-
-
-    //call Oracle REST service and populate grid
-    function getClosestStations(geometry) {
-        var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
-        esriRequest(url).then(function(response) {
-            var responseJSON = JSON.stringify(response, null, 2);
-            dataStore.objectStore.data = response.data.items;
-            grid.set("collection", dataStore);
         });
     }
 
@@ -172,16 +171,6 @@ require([
      * Create the map view and ui components
      *
      ******************************************************************/
-    var tempGraphicsLayer = new GraphicsLayer();
-
-    //match the one used by the Search widget
-    var pointSymbol = {
-        "type": "picture-marker",
-        "url": "https://js.arcgis.com/4.7/esri/images/search/search-symbol-32.svg",
-        "height": 24,
-        "width": 24
-    };
-
     var stationsLayer = new MapImageLayer({
         url: app.mapserviceUrl,
         minScale: 3000000
@@ -189,7 +178,7 @@ require([
 
     var map = new Map({
         basemap: app.basemap,
-        layers: [stationsLayer, tempGraphicsLayer]
+        layers: [stationsLayer]
     });
 
     app.mapView = new MapView({
@@ -203,40 +192,18 @@ require([
         }
     });
 
-
-    //callback for draw complete
-    function addMapPoint(evt) {
-        showSearchPointAndZoom(evt.geometry);
-        getClosestStations(evt.geometry);
-    }
-
-
-    function showSearchPointAndZoom(geometry) {
-        tempGraphicsLayer.removeAll();
-        app.mapView.graphics.removeAll();
-
-        app.searchPointGraphic = new Graphic({
-            geometry: geometry,
-            symbol: pointSymbol
-        });
-
-        //TODO shared graphics layer
-        tempGraphicsLayer.add(app.searchPointGraphic);
-        app.mapView.graphics.add(app.searchPointGraphic);
-
-        app.mapView.goTo({target: geometry, zoom: 10} );
-    }
-
-
     app.mapView.when(function(){
         app.mapView.ui.add("mapPointBtn", "top-left");
 
         var sketchViewModel = new SketchViewModel({
             view: app.mapView,
-            layer: tempGraphicsLayer,
-            pointSymbol: pointSymbol
+            layer: new GraphicsLayer(),
+            pointSymbol: app.searchPointSymbol
         });
-        sketchViewModel.on("draw-complete", addMapPoint);
+        sketchViewModel.on("draw-complete", function(evt) {
+            showSearchPointAndZoom(evt.geometry);
+            getClosestStations(evt.geometry);
+        });
 
         var drawPointButton = document.getElementById("mapPointBtn");
         drawPointButton.onclick = function() {
@@ -285,5 +252,36 @@ require([
         //TODO. change mapservice, webservice URLs
         console.log(e.target.options[e.target.selectedIndex].value);
     });
+
+
+    /******************************************************************
+     *
+     * support functions
+     *
+     ******************************************************************/
+    function showSearchPointAndZoom(geometry) {
+        app.mapView.graphics.removeAll();
+
+        app.searchPointGraphic = new Graphic({
+            geometry: geometry,
+            symbol: app.searchPointSymbol
+        });
+
+        app.mapView.graphics.add(app.searchPointGraphic);
+
+        app.mapView.goTo({target: geometry, zoom: 10} );
+    }
+
+
+    //call Oracle REST service and populate grid
+    function getClosestStations(geometry) {
+        var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+        esriRequest(url).then(function(response) {
+            var responseJSON = JSON.stringify(response, null, 2);
+            dataStore.objectStore.data = response.data.items;
+            grid.set("collection", dataStore);
+        });
+    }
+
 
 });
