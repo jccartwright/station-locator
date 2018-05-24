@@ -92,10 +92,11 @@ require([
         searchWidget: null,
         serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
         numStations: 10,
-        mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/ghcnd_test/MapServer',
+        mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/stations/MapServer',
         searchPointSymbol: null,
         selectedPointSymbol: null,
-        searchPointGraphic: null
+        searchPointGraphic: null,
+        selectedLayer: 1
     };
 
     //match the one used by the Search widget
@@ -117,6 +118,23 @@ require([
         }
     };
 
+    //array index corresponds to map service layer index
+    app.layers = [
+        { name: 'NEXRAD', index: 0 },
+        { name: 'GHCN Daily', index: 1 },
+        { name: 'Local Climatological Data', index: 2 },
+        { name: 'U.S. 15 Minute Precipitation', index: 3 },
+        { name: 'Hourly Precipitation', index: 4 },
+        { name: 'Global Summary of the Month', index: 5 },
+        { name: 'Global Summary of the Day', index: 6},
+        { name: 'Hourly Global', index: 7 },
+        { name: 'Climate Reference Network', index: 8 },
+        { name: 'Global Summary of the Year', index: 9 },
+        { name: 'Hourly Climate Normals', index: 10 },
+        { name: 'Daily Climate Normals', index: 11 },
+        { name: 'Monthly Climate Normals', index: 12 },
+        { name: 'Annual Climate Normals', index: 13 }
+    ];
 
 
 
@@ -181,7 +199,23 @@ require([
      ******************************************************************/
     var stationsLayer = new MapImageLayer({
         url: app.mapserviceUrl,
-        minScale: 3000000
+        //minScale: 3000000,
+        sublayers: [
+            { id: 0, visible: false, minScale: 50000000 },
+            { id: 1, visible: true, minScale: 3000000 },
+            { id: 2, visible: false, minScale: 3000000 },
+            { id: 3, visible: false, minScale: 3000000 },
+            { id: 4, visible: false, minScale: 3000000 },
+            { id: 5, visible: false, minScale: 3000000 },
+            { id: 6, visible: false, minScale: 3000000 },
+            { id: 7, visible: false, minScale: 3000000 },
+            { id: 8, visible: false, minScale: 3000000 },
+            { id: 9, visible: false, minScale: 3000000 },
+            { id: 10, visible: false, minScale: 3000000 },
+            { id: 11, visible: false, minScale: 3000000 },
+            { id: 12, visible: false, minScale: 3000000 },
+            { id: 13, visible: false, minScale: 3000000 }
+        ]
     });
 
     var map = new Map({
@@ -228,7 +262,7 @@ require([
         app.identifyParams = new IdentifyParameters();
         app.identifyParams.tolerance = 3;
         //default to GHCN. allow user to choose
-        app.identifyParams.layerIds = [0];
+        app.identifyParams.layerIds = [1];
         app.identifyParams.layerOption = 'top';
         app.identifyParams.width = app.mapView.width;
         app.identifyParams.height = app.mapView.height;
@@ -267,12 +301,12 @@ require([
      ******************************************************************/
     query("#settingsNumResults").on("change", function(e) {
         app.numStations = e.target.options[e.target.selectedIndex].value;
-        console.log(app.numStations);
     });
 
     query("#settingsStations").on("change", function(e) {
         //TODO. change mapservice, webservice URLs
         console.log(e.target.options[e.target.selectedIndex].value);
+        updateStationLayer(parseInt(e.target.options[e.target.selectedIndex].value));
     });
 
 
@@ -297,23 +331,26 @@ require([
 
     //call Oracle REST service and populate grid
     function getClosestStations(geometry) {
+        dom.byId(app.containerMap).style.cursor = "wait";
         var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
         esriRequest(url).then(function(response) {
             var responseJSON = JSON.stringify(response, null, 2);
             dataStore.objectStore.data = response.data.items;
             grid.set("collection", dataStore);
+            dom.byId(app.containerMap).style.cursor = "auto";
+
         });
     }
 
 
     function executeIdentifyTask(event) {
+        app.mapView.popup.close();
         app.identifyParams.geometry = event.mapPoint;
         app.identifyParams.mapExtent = app.mapView.extent;
-        // dom.byId(app.containerMap).style.cursor = "wait";
+        dom.byId(app.containerMap).style.cursor = "wait";
 
         app.identifyTask.execute(app.identifyParams).then(function(response) {
             var results = response.results;
-            console.log(results);
 
             return arrayUtils.map(results, function(result) {
                 var feature = result.feature;
@@ -335,9 +372,29 @@ require([
                     location: event.mapPoint
                 })
             }
+            dom.byId(app.containerMap).style.cursor = "auto";
         }
     }
 
 
+    function updateMessage(message) {
+        dom.byId('messagePanel').innerHTML = message;
+    }
 
+
+    function updateStationLayer(layerId) {
+        //toggle visibility
+        stationsLayer.sublayers.forEach(function(sublayer) {
+            if (sublayer.id === layerId) {
+                sublayer.visible = true;
+            } else {
+                sublayer.visible = false;
+            }
+        });
+        //update IdentifyTask
+        app.identifyParams.layerIds = [layerId];
+
+
+        updateMessage(app.layers[layerId].name);
+    }
 });

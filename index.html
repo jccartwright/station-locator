@@ -89,11 +89,18 @@
         </div>
     </div>
 </div>
+<!-- /.calcite-map -->
+
+
+<!-- Grid -->
 <div id="gridDisplay">
-    <span class="info" id="featureCount"></span>
+    <div>
+        <span class="info" id="messagePanel">Global Historical Climatology Network</span>
+    </div>
     <div id="grid"></div>
 </div>
-<!-- /.calcite-map -->
+<!-- end Grid -->
+
 
 <!-- Panels -->
 
@@ -152,11 +159,28 @@
                         <label for="settingsStations" class="col-xs-3 control-label">Station Network</label>
                         <div class="col-xs-9">
                             <select id="settingsStations" class="form-control">
+                                <option value=0>NEXRAD</option>
+                                <option value=1 selected>GHCN Daily</option>
+                                <option value=2>Local Climatological Data</option>
+                                <option value=3>U.S. 15 Minute Precipitation</option>
+                                <option value=4>Hourly Precipitation</option>
+                                <option value=5>Global Summary of the Month</option>
+                                <option value=6>Global Summary of the Day</option>
+                                <option value=7>Hourly Global</option>
+                                <option value=8>Climate Reference Network</option>
+                                <option value=9>Global Summary of the Year</option>
+                                <option value=10>Hourly Climate Normals</option>
+                                <option value=11>Daily Climate Normals</option>
+                                <option value=12>Monthly Climate Normals</option>
+                                <option value=13>Annual Climate Normals</option>
+
+
+                                <!--
                                 <option value="ghcnd" selected>Global Historical Climatology Network Daily</option>
-                                <option value="gsom" disabled>Global Summary of the Month</option>
-                                <option value="gsoy" disabled>Global Summary of the Year</option>
-                                <option value="gsod" disabled>Global Summary of the Day</option>
-                                <option value="lcd" disabled>Local Climatological Data</option>
+                                <option value="gsom">Global Summary of the Month</option>
+                                <option value="gsoy">Global Summary of the Year</option>
+                                <option value="gsod">Global Summary of the Day</option>
+                                <option value="lcd">Local Climatological Data</option>
                                 <option value="precip15" disabled>Precipitation 15 minute</option>
                                 <option value="precipHrly" disabled>Precipitation Hourly</option>
                                 <option value="globalHrly" disabled>Global Hourly</option>
@@ -169,6 +193,7 @@
                                 <option value="nexradIII" disabled>NEXRAD III</option>
                                 <option value="dailySummaries" disabled>Daily Summaries</option>
                                 <option value="monthlySummaries" disabled>Monthly Summaries</option>
+                                -->
                             </select>
                         </div>
                     </div>
