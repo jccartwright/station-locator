@@ -234,6 +234,26 @@ require([
         }
     });
 
+    //initialize message panel w/ default layer's name
+    updateMessage(app.layers[app.selectedLayer].name);
+
+    //setup export button
+    var exportButton = dom.byId("exportButton");
+    on( dom.byId("exportButton"), 'click', function() {
+        if (dataStore.objectStore.data.length == 0) {
+            alert("no stations have been selected to export");
+            return
+        }
+
+        //forced to wrap CSV output in HTML tags to get carriage returns. No way to specify text/plain?
+        var win = window.open("","","width=600,height=300,scrollbars=1,resizable=1");
+        var html = '<html><head></head><body>Station Id,Station Name,Distance<br>';
+        arrayUtils.forEach(dataStore.objectStore.data, function(item) {
+            html += item.station_id+','+item.station_name+','+item.distance+'<br>';
+        });
+        win.document.write(html+'</body></html>');
+    });
+
 
     app.mapView.when(function(){
         //draw point
@@ -254,6 +274,7 @@ require([
             // set the sketch to create a point geometry
             sketchViewModel.create("point");
         };
+
 
         //Identify
         app.mapView.on('click', executeIdentifyTask);
@@ -304,8 +325,7 @@ require([
     });
 
     query("#settingsStations").on("change", function(e) {
-        //TODO. change mapservice, webservice URLs
-        console.log(e.target.options[e.target.selectedIndex].value);
+        //TODO. change webservice URLs
         updateStationLayer(parseInt(e.target.options[e.target.selectedIndex].value));
     });
 
@@ -338,6 +358,11 @@ require([
             dataStore.objectStore.data = response.data.items;
             grid.set("collection", dataStore);
             dom.byId(app.containerMap).style.cursor = "auto";
+
+            //update message window
+            var messagePanel = dom.byId('messagePanel');
+
+            messagePanel.innerHTML = '<b>'+app.layers[app.selectedLayer].name+'</b> - '+app.numStations+' stations nearest location: '+geometry.longitude.toFixed(3)+','+geometry.latitude.toFixed(3);
 
         });
     }
@@ -378,11 +403,13 @@ require([
 
 
     function updateMessage(message) {
-        dom.byId('messagePanel').innerHTML = message;
+        dom.byId('messagePanel').innerHTML = '<b>'+message+'<b>';
     }
 
 
     function updateStationLayer(layerId) {
+        app.selectedLayer = layerId;
+
         //toggle visibility
         stationsLayer.sublayers.forEach(function(sublayer) {
             if (sublayer.id === layerId) {
@@ -394,6 +421,9 @@ require([
         //update IdentifyTask
         app.identifyParams.layerIds = [layerId];
 
+        //zero out any previously existing search results
+        dataStore.objectStore.data = [];
+        grid.refresh();
 
         updateMessage(app.layers[layerId].name);
     }
