@@ -161,7 +161,7 @@ require([
 
     //Query task used to retrieve details of selected station
     var queryTask = new QueryTask({
-        url: app.mapserviceUrl+'/0'
+        url: app.mapserviceUrl+'/1'
     });
     var querySupport = new Query();
     querySupport.returnGeometry = true;
@@ -409,6 +409,8 @@ require([
 
     function updateStationLayer(layerId) {
         app.selectedLayer = layerId;
+
+        queryTask.url = app.mapserviceUrl+'/'+ layerId;
 
         //toggle visibility
         stationsLayer.sublayers.forEach(function(sublayer) {
