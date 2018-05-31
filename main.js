@@ -90,7 +90,7 @@ require([
         containerMap: "mapViewDiv",
         activeView: null,
         searchWidget: null,
-        serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations/ghcnd/',
+        serviceUrl: 'https://www.ncdc.noaa.gov/ords/stations',
         numStations: 10,
         mapserviceUrl: 'https://gis.ncdc.noaa.gov/arcgis/rest/services/cdo/stations/MapServer',
         searchPointSymbol: null,
@@ -120,23 +120,21 @@ require([
 
     //array index corresponds to map service layer index
     app.layers = [
-        { name: 'NEXRAD', index: 0 },
-        { name: 'GHCN Daily', index: 1 },
-        { name: 'Local Climatological Data', index: 2 },
-        { name: 'U.S. 15 Minute Precipitation', index: 3 },
-        { name: 'Hourly Precipitation', index: 4 },
-        { name: 'Global Summary of the Month', index: 5 },
-        { name: 'Global Summary of the Day', index: 6},
-        { name: 'Hourly Global', index: 7 },
-        { name: 'Climate Reference Network', index: 8 },
-        { name: 'Global Summary of the Year', index: 9 },
-        { name: 'Hourly Climate Normals', index: 10 },
-        { name: 'Daily Climate Normals', index: 11 },
-        { name: 'Monthly Climate Normals', index: 12 },
-        { name: 'Annual Climate Normals', index: 13 }
+        { name: 'NEXRAD', key: 'nexrad', index: 0 },
+        { name: 'GHCN Daily', key: 'ghcnd', index: 1 },
+        { name: 'Local Climatological Data', key: 'lcd', index: 2 },
+        { name: 'U.S. 15 Minute Precipitation', key: 'precip15', index: 3 },
+        { name: 'Hourly Precipitation', key: 'preciphly', index: 4 },
+        { name: 'Global Summary of the Month', key: 'gsom', index: 5 },
+        { name: 'Global Summary of the Day', key: 'gsod', index: 6},
+        { name: 'Hourly Global', key: 'isd', index: 7 },
+        { name: 'Climate Reference Network', key: 'crn', index: 8 },
+        { name: 'Global Summary of the Year', key: 'gsod', index: 9 },
+        { name: 'Hourly Climate Normals', key: 'normalshly', index: 10 },
+        { name: 'Daily Climate Normals', key: 'normalsdly', index: 11 },
+        { name: 'Monthly Climate Normals', key: 'normalsmly', index: 12 },
+        { name: 'Annual Climate Normals', key: 'normalsann', index: 13 }
     ];
-
-
 
     /******************************************************************
      *
@@ -161,7 +159,7 @@ require([
 
     //Query task used to retrieve details of selected station
     var queryTask = new QueryTask({
-        url: app.mapserviceUrl+'/1'
+        url: app.mapserviceUrl+'/'+app.selectedLayer
     });
     var querySupport = new Query();
     querySupport.returnGeometry = true;
@@ -325,7 +323,6 @@ require([
     });
 
     query("#settingsStations").on("change", function(e) {
-        //TODO. change webservice URLs
         updateStationLayer(parseInt(e.target.options[e.target.selectedIndex].value));
     });
 
@@ -352,7 +349,11 @@ require([
     //call Oracle REST service and populate grid
     function getClosestStations(geometry) {
         dom.byId(app.containerMap).style.cursor = "wait";
-        var url = app.serviceUrl + geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+
+        var activeLayer = app.layers[app.selectedLayer];
+
+        var url = app.serviceUrl + '/'+activeLayer.key+'/'+geometry.longitude + '/' + geometry.latitude + '/' + app.numStations;
+        console.log(url);
         esriRequest(url).then(function(response) {
             var responseJSON = JSON.stringify(response, null, 2);
             dataStore.objectStore.data = response.data.items;
