@@ -252,7 +252,7 @@ require([
         var win = window.open("","","width=600,height=300,scrollbars=1,resizable=1");
         var html = '<html><head></head><body>Station Id,Station Name,Distance, Start Date, End Date, Latitude. Longitude, Elevation<br>';
         arrayUtils.forEach(dataStore.objectStore.data, function(item) {
-            html += item.station_id+','+item.station_name+','+item.distance+','+item.start_date+','+item.end_date+','+item.latitude+','+item.longitude+','+item.elevation+'<br>';
+            html += item.station_id+',"'+item.station_name+'",'+item.distance+','+item.start_date+','+item.end_date+','+item.latitude+','+item.longitude+','+item.elevation+'<br>';
         });
         win.document.write(html+'</body></html>');
     });
