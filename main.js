@@ -250,9 +250,9 @@ require([
 
         //forced to wrap CSV output in HTML tags to get carriage returns. No way to specify text/plain?
         var win = window.open("","","width=600,height=300,scrollbars=1,resizable=1");
-        var html = '<html><head></head><body>Station Id,Station Name,Distance<br>';
+        var html = '<html><head></head><body>Station Id,Station Name,Distance, Start Date, End Date, Latitude. Longitude, Elevation<br>';
         arrayUtils.forEach(dataStore.objectStore.data, function(item) {
-            html += item.station_id+','+item.station_name+','+item.distance+'<br>';
+            html += item.station_id+','+item.station_name+','+item.distance+','+item.start_date+','+item.end_date+','+item.latitude+','+item.longitude+','+item.elevation+'<br>';
         });
         win.document.write(html+'</body></html>');
     });
