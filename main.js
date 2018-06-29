@@ -152,7 +152,12 @@ require([
         columns: {
             station_id: 'Id',
             station_name: 'Name',
-            distance: 'Distance'
+            distance: 'Distance',
+            start_date: 'Start Date',
+            end_date: 'End Date',
+            latitude: 'Latitude',
+            longitude: 'Longitude',
+            elevation: 'Elevation'
         }
     }, "grid");
     grid.on('dgrid-select', selectFeatureFromGrid);
